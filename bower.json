@@ -1,11 +1,12 @@
 {
-  "name": "jquery_lazyload",
+  "name": "lazyload.ume",
   "version": "1.9.3",
   "homepage": "http://www.appelsiini.net/projects/lazyload",
   "authors": [
-    "Mika Tuupola <tuupola@appelsiini.net>"
+    "Mika Tuupola <tuupola@appelsiini.net>",
+	"Samuel Estok <sam@faction23.com>"
   ],
-  "description": "jQuery plugin for lazy loading images",
+  "description": "jQuery plugin for lazy loading images ported from Jquery Lazyload",
   "main": [
     "jquery.lazyload.js",
     "jquery.scrollstop.js"

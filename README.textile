@@ -1,6 +1,6 @@
 h1. Lazy Load Plugin for jQuery
 
-Retina/Multi Image port of [jQuery Lazyload](https://github.com/tuupola/jquery_lazyload)
+Retina/Multi Image port of "jQuery Lazyload":https://github.com/tuupola/jquery_lazyload
 
 Check there for all standard feature docs. Extended features documented here.
 
