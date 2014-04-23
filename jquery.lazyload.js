@@ -14,9 +14,12 @@
  */
 
 (function($, window, document, undefined) {
-    var $window = $(window);
+
+    var $window = $(window),
+		resize_timer;
 
     $.fn.lazyload = function(options) {
+
         var elements = this,
 			$container,
 			settings = {
@@ -29,6 +32,7 @@
 				load             : null,
 				mobile_breakpoint: 768,
 				placeholder      : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC",
+				resize_debounce  : 200,
 				resize_event     : "resize",
 				skip_invisible   : true,
 				threshold        : 0,
@@ -36,26 +40,26 @@
 			};
 
         function update() {
+
             var counter = 0;
 
             elements
 				.each(function() {
+
 					var $this = $(this);
-					if (settings.skip_invisible && !$this.is(":visible")) {
+
+					if (settings.skip_invisible && !$this.is(":visible"))
 						return;
-					}
-					if ($.abovethetop(this, settings) ||
-						$.leftofbegin(this, settings)) {
+
+					if ($.abovethetop(this, settings) || $.leftofbegin(this, settings)) {
 							/* Nothing. */
-					} else if (!$.belowthefold(this, settings) &&
-						!$.rightoffold(this, settings)) {
+					} else if (!$.belowthefold(this, settings) && !$.rightoffold(this, settings)) {
 							$this.trigger("appear");
 							/* if we found an image we'll load, reset the counter */
 							counter = 0;
 					} else {
-						if (++counter > settings.failure_limit) {
+						if (++counter > settings.failure_limit)
 							return false;
-						}
 					}
 				});
 
@@ -148,9 +152,11 @@
         });
 
         /* Check if something appears when window is resized. */
-        $window.bind("resize", function() {
-            update();
-        });
+		$window
+			.bind(settings.resize_event, function() {
+				clearTimeout(resize_timer);
+				resize_timer = setTimeout(update, settings.resize_debounce);
+			});
 
         /* With IOS5 force loading images when navigating with back button. */
         /* Non optimal workaround. */

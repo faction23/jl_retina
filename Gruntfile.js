@@ -5,7 +5,7 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON("package.json"),
         uglify : {
             options: {
-                banner: "/*! Lazy Load <%= pkg.version %> - MIT license - Copyright 2010-2013 Mika Tuupola */\n"
+                banner: "/*! Lazy Load <%= pkg.version %> - MIT license - Copyright 2010-2013 Mika Tuupola (Ported by Samuel Estok) */\n"
             },
             target: {
                 files: {
@@ -16,7 +16,7 @@ module.exports = function(grunt) {
         },
         watch: {
             files: ["*.js", "!*.min.js" ,"test/spec/*Spec.js"],
-            tasks: ["test"],
+            tasks: ["test", "uglify"]
         },
         jshint: {
             files: ["*.js", "!*.min.js" ,"test/spec/*Spec.js"],
