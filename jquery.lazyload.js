@@ -23,6 +23,7 @@
     $.fn.lazyload = function (options) {
 
         var elements = this,
+            load_delay = 300,
             $container,
             settings = {
                 appear           : null,
@@ -34,12 +35,15 @@
                 data_json        : "img-sizes",
                 event            : "scroll",
                 failure_limit    : 0,
+                filename_sep     : "",
                 load             : null,
                 mobile_breakpoint: 768,
                 placeholder      : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC",
                 resize_debounce  : 200,
                 resize_event     : "resize",
                 skip_invisible   : true,
+                sequential       : false,
+                seq_intval       : 100,
                 threshold        : 0,
                 use_mobile       : false,
                 use_json         : false,
@@ -121,7 +125,7 @@
                     json_key = (settings.use_retina && retina) ? "d2x" : "d";
 
                 if(sizes.hasOwnProperty(json_key))
-                    img_src = img_src.replace(/(\.[\w\d_-]+)$/i, sizes[json_key] + "$1");
+                    img_src = img_src.replace(/(\.[\w\d_-]+)$/i, settings.filename_sep + sizes[json_key] + "$1");
 
             }
 
@@ -183,15 +187,19 @@
 
                                 $self.css(css_start);
 
-                                if ($self.is("img")) {
-                                    $self.attr("src", original);
-                                } else {
-                                    $self.css("background-image", "url('" + original + "')");
-                                }
-
-                                $self.css(css_end);
+                                setTimeout(function(){
+                                    if ($self.is("img")) {
+                                        $self.attr("src", original);
+                                    } else {
+                                        $self.css("background-image", "url('" + original + "')");
+                                    }
+                                    $self.css(css_end);
+                                }, load_delay);
 
                                 self.loaded = true;
+
+                                if(settings.sequential)
+                                    load_delay = load_delay + settings.seq_intval;
 
                                 /* Remove image from array so it is not looped next time. */
                                 var temp = $.grep(elements, function (element) {
