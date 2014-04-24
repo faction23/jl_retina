@@ -16,6 +16,8 @@
 (function ($, window, document, undefined) {
 
     var $window = $(window),
+        retina = false,
+        v_width = 0,
         resize_timer;
 
     $.fn.lazyload = function (options) {
@@ -25,8 +27,11 @@
             settings = {
                 appear           : null,
                 container        : window,
+                css_duration     : 400,
+                css_easing       : "ease-in-out",
+                css_fade         : true,
                 data_attribute   : "original",
-                effect           : "show",
+                data_json        : "img-sizes",
                 event            : "scroll",
                 failure_limit    : 0,
                 load             : null,
@@ -36,12 +41,37 @@
                 resize_event     : "resize",
                 skip_invisible   : true,
                 threshold        : 0,
-                use_placeholder  : true
+                use_mobile       : false,
+                use_json         : false,
+                use_retina       : true
+            },
+            css_start,
+            css_end;
+
+        if(settings.css_fade){
+            css_start = {
+                "opacity":"0",
+                "-webkit-transition": "opacity " + settings.css_duration + "ms " + settings.css_easing + "",
+                "transition": "opacity " + settings.css_duration + "ms " + settings.css_easing + ""
             };
+            css_end = {
+                "opacity":"1"
+            };
+        } else {
+            css_start = {
+                "visibility":"none"
+            };
+            css_end = {
+                "visibility":"visible"
+            };
+        }
 
         function update() {
 
             var counter = 0;
+
+            v_width = $(window).width();
+            retina = (isRetina()) ? true : false;
 
             elements
                 .each(function () {
@@ -62,6 +92,40 @@
                             return false;
                     }
                 });
+
+        }
+
+        function isRetina(){
+
+            var mediaQuery = "(-webkit-min-device-pixel-ratio: 1.5),\
+            (min--moz-device-pixel-ratio: 1.5),\
+            (-o-min-device-pixel-ratio: 3/2),\
+            (min-resolution: 1.5dppx)";
+
+            return window.devicePixelRatio > 1 || (window.matchMedia && window.matchMedia(mediaQuery).matches);
+
+        }
+
+        function getSrc($self){
+
+            var img_src = $self.attr("data-" + settings.data_attribute);
+
+            if(settings.use_json){
+
+                var sizes = $self.data(settings.data_json),
+                    json_key = "";
+
+                if(settings.use_mobile && v_width < settings.mobile_breakpoint)
+                    json_key = (settings.use_retina && retina) ? "m2x" : "m";
+                else
+                    json_key = (settings.use_retina && retina) ? "d2x" : "d";
+
+                if(sizes.hasOwnProperty(json_key))
+                    img_src = img_src.replace(/(\.[\w\d_-]+)$/i, sizes[json_key] + "$1");
+
+            }
+
+            return img_src;
 
         }
 
@@ -91,8 +155,9 @@
         }
 
         this.each(function () {
-            var self = this;
-            var $self = $(self);
+
+            var self = this,
+                $self = $(self);
 
             self.loaded = false;
 
@@ -114,14 +179,17 @@
                         $("<img />")
                             .bind("load", function () {
 
-                                var original = $self.attr("data-" + settings.data_attribute);
-                                $self.hide();
+                                var original = getSrc($self);
+
+                                $self.css(css_start);
+
                                 if ($self.is("img")) {
                                     $self.attr("src", original);
                                 } else {
                                     $self.css("background-image", "url('" + original + "')");
                                 }
-                                $self[settings.effect](settings.effect_speed);
+
+                                $self.css(css_end);
 
                                 self.loaded = true;
 
@@ -136,7 +204,7 @@
                                     settings.load.call(self, elements_left, settings);
                                 }
                             })
-                            .attr("src", $self.attr("data-" + settings.data_attribute));
+                            .attr("src", getSrc($self));
                     }
                 });
 
