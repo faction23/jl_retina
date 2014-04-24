@@ -23,14 +23,13 @@
     $.fn.lazyload = function (options) {
 
         var elements = this,
-            load_delay = 300,
             $container,
             settings = {
+                anm_duration     : 400,
+                anm_easing       : "linear",
+                anm_fade         : true,
                 appear           : null,
                 container        : window,
-                css_duration     : 400,
-                css_easing       : "ease-in-out",
-                css_fade         : true,
                 data_attribute   : "original",
                 data_json        : "img-sizes",
                 event            : "scroll",
@@ -42,33 +41,14 @@
                 resize_debounce  : 200,
                 resize_event     : "resize",
                 skip_invisible   : true,
-                sequential       : false,
-                seq_intval       : 100,
                 threshold        : 0,
                 use_mobile       : false,
                 use_json         : false,
                 use_retina       : true
-            },
-            css_start,
-            css_end;
+            };
 
-        if(settings.css_fade){
-            css_start = {
-                "opacity":"0",
-                "-webkit-transition": "opacity " + settings.css_duration + "ms " + settings.css_easing + "",
-                "transition": "opacity " + settings.css_duration + "ms " + settings.css_easing + ""
-            };
-            css_end = {
-                "opacity":"1"
-            };
-        } else {
-            css_start = {
-                "visibility":"none"
-            };
-            css_end = {
-                "visibility":"visible"
-            };
-        }
+        if(settings.anm_fade)
+            elements.css("opacity", "0");
 
         function update() {
 
@@ -185,21 +165,28 @@
 
                                 var original = getSrc($self);
 
-                                $self.css(css_start);
+                                if(!settings.anm_fade)
+                                    elements.css("opacity", "0");
 
-                                setTimeout(function(){
-                                    if ($self.is("img")) {
-                                        $self.attr("src", original);
-                                    } else {
-                                        $self.css("background-image", "url('" + original + "')");
-                                    }
-                                    $self.css(css_end);
-                                }, load_delay);
+                                if ($self.is("img")) {
+                                    $self.attr("src", original);
+                                } else {
+                                    $self.css("background-image", "url('" + original + "')");
+                                }
+
+                                if(settings.anm_fade){
+                                    $self
+                                        .animate({
+                                            opacity: "1"
+                                        },
+                                        settings.anm_duration,
+                                        settings.anm_easing
+                                    );
+                                } else {
+                                    $self.css("opacity", "1");
+                                }
 
                                 self.loaded = true;
-
-                                if(settings.sequential)
-                                    load_delay = load_delay + settings.seq_intval;
 
                                 /* Remove image from array so it is not looped next time. */
                                 var temp = $.grep(elements, function (element) {
