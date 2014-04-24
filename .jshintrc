@@ -1,15 +1,15 @@
 {
-	"curly": true,
-	"eqeqeq": true,
-	"eqnull": true,
-	"immed": true,
-	"noarg": true,
-	"quotmark": "double",
-	"trailing": true,
-	"undef": true,
-	"unused": true,
-
-	"node": true,
-	"jquery": true,
-	"browser": true
+    "curly"   : false,
+    "eqeqeq"  : true,
+    "eqnull"  : true,
+    "immed"   : true,
+    "noarg"   : true,
+    "quotmark": "double",
+    "trailing": true,
+    "undef"   : true,
+    "unused"  : true,
+    "multistr": true,
+    "node"    : true,
+    "jquery"  : true,
+    "browser" : true
 }
