@@ -42,16 +42,18 @@
 				placeholder      : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC",
 				resize_debounce  : 200,
 				resize_event     : "resize",
+				responsive       : true,
 				skip_invisible   : true,
+				shim             : location.protocol + "//" + location.host + "/1x1.png",
 				threshold        : 0,
 				use_mobile       : false,
 				use_json         : false,
 				use_retina       : true
 			};
 
-        if ( settings.anm_fade ) {
-            elements.css( "opacity", "0" );
-        }
+		if ( settings.anm_fade ) {
+			elements.css( "opacity", "0" );
+		}
 
 		function update() {
 
@@ -65,9 +67,9 @@
 
 					var $this = $( this );
 
-                    if ( settings.skip_invisible && !$this.is( ":visible" ) ) {
-                        return;
-                    }
+					if ( settings.skip_invisible && !$this.is( ":visible" ) ) {
+						return;
+					}
 
 					if ( $.abovethetop( this, settings ) || $.leftofbegin( this, settings ) ) {
 						/* Nothing. */
@@ -78,12 +80,33 @@
 						counter = 0;
 					}
 					else {
-                        if ( ++counter > settings.failure_limit ) {
-                            return false;
-                        }
+						if ( ++counter > settings.failure_limit ) {
+							return false;
+						}
 					}
 				} );
 
+		}
+
+		function convertToB64( image, callback ) {
+
+			var canvas = document.createElement( "CANVAS" ),
+				ctx = canvas.getContext( "2d" ),
+				img = new Image();
+
+			img.crossOrigin = "Anonymous";
+
+			img.onload = function() {
+				var dataURL;
+				canvas.height = image.h;
+				canvas.width = image.w;
+				ctx.drawImage( img, 0, 0 );
+				dataURL = canvas.toDataURL( "image/png" );
+				callback.call( this, dataURL );
+				canvas = null;
+			};
+
+			img.src = settings.shim;
 		}
 
 		function hasAttr( self, name ) {
@@ -113,24 +136,25 @@
 				var sizes = $self.data( settings.data_json ),
 					json_key = "";
 
-                if ( settings.use_mobile && v_width < settings.mobile_breakpoint ) {
-                    json_key = (settings.use_retina && retina) ? "m2x" : "m";
-                }
-                else {
-                    json_key = (settings.use_retina && retina) ? "d2x" : "d";
-                }
+				if ( settings.use_mobile && v_width < settings.mobile_breakpoint ) {
+					json_key = (settings.use_retina && retina) ? "m2x" : "m";
+				}
+				else {
+					json_key = (settings.use_retina && retina) ? "d2x" : "d";
+				}
 
-                if ( sizes.hasOwnProperty( json_key ) ) {
-                    img_src = img_src.replace( /(\.[\w\d_-]+)$/i, settings.filename_sep + sizes[json_key] + "$1" );
-                }
+				if ( sizes.hasOwnProperty( json_key ) ) {
+					img_src = img_src.replace( /(\.[\w\d_-]+)$/i, settings.filename_sep + sizes[json_key] + "$1" );
+				}
 
-			} else {
+			}
+			else {
 
-				if ( settings.use_mobile && v_width < settings.mobile_breakpoint && hasAttr( $self, 'src-mobile' ) ) {
+				if ( settings.use_mobile && v_width < settings.mobile_breakpoint && hasAttr( $self, "src-mobile" ) ) {
 					img_src = $self.attr( "data-src-mobile" );
 				}
 
-				if ( settings.use_mobile && v_width >= settings.mobile_breakpoint && hasAttr( $self, 'src-retina' ) ) {
+				if ( settings.use_mobile && v_width >= settings.mobile_breakpoint && hasAttr( $self, "src-retina" ) ) {
 					img_src = $self.attr( "data-src-retina" );
 				}
 
@@ -175,11 +199,28 @@
 			/* If no src attribute given use data:uri. */
 			if ( $self.attr( "src" ) === undefined || $self.attr( "src" ) === false ) {
 				if ( $self.is( "img" ) ) {
-					$self.attr( "src", settings.placeholder );
+					if (
+						settings.responsive &&
+						( hasAttr( $self, "width" ) && hasAttr( $self, "height" ) ) ||
+						( hasAttr( $self, "data-width" ) && hasAttr( $self, "data-height" ) )
+					) {
+						var image = {};
+
+						image.w = hasAttr( $self, "width" ) ? $self.attr( "width" ) : $self.attr( "data-width" );
+						image.h = hasAttr( $self, "height" ) ? $self.attr( "height" ) : $self.attr( "data-height" );
+
+						convertToB64( image, function( b64_image ) {
+							$self.attr( "src", b64_image );
+						} );
+
+					}
+					else {
+						$self.attr( "src", settings.placeholder );
+					}
 				}
 			}
 
-			/* When appear is triggered load original image. */
+			///* When appear is triggered load original image. */
 			$self
 				.one( "appear", function() {
 					if ( !this.loaded ) {
@@ -192,9 +233,9 @@
 
 								var original = getSrc( $self );
 
-                                if ( !settings.anm_fade ) {
-                                    elements.css( "opacity", "0" );
-                                }
+								if ( !settings.anm_fade ) {
+									elements.css( "opacity", "0" );
+								}
 
 								if ( $self.is( "img" ) ) {
 									$self.attr( "src", original );
