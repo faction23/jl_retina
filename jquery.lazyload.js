@@ -150,12 +150,12 @@
 			}
 			else {
 
-				if ( settings.use_mobile && v_width < settings.mobile_breakpoint && hasAttr( $self, "src-mobile" ) ) {
-					img_src = $self.attr( "data-src-mobile" );
+				if ( settings.use_mobile && v_width < settings.mobile_breakpoint && hasAttr( $self, "data-mobile-src" ) ) {
+					img_src = $self.attr( "data-mobile-src" );
 				}
 
-				if ( settings.use_mobile && v_width >= settings.mobile_breakpoint && hasAttr( $self, "src-retina" ) ) {
-					img_src = $self.attr( "data-src-retina" );
+				if ( settings.use_mobile && v_width >= settings.mobile_breakpoint && hasAttr( $self, "data-retina-src" ) ) {
+					img_src = $self.attr( "data-retina-src" );
 				}
 
 			}
