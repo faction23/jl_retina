@@ -210,7 +210,9 @@
 						image.h = hasAttr( $self, "height" ) ? $self.attr( "height" ) : $self.attr( "data-height" );
 
 						convertToB64( image, function( b64_image ) {
-							$self.attr( "src", b64_image );
+							if ( $self.attr( "src" ) === undefined || $self.attr( "src" ) === false ) {
+								$self.attr( "src", b64_image );
+							}
 						} );
 
 					}
